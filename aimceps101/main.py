@@ -2,6 +2,7 @@ import pygame
 import sys
 import math # For distance between mouse click and target to register click
 import random # Repositioning of targets after each hits
+import time # Time aspect of the game 
 
 # Initialize Pygame
 pygame.init()
@@ -18,6 +19,10 @@ target_radius = 25
 # Initialize the score
 score = 0
 font = pygame.font.Font(None, 36)
+
+# Game duration
+game_duration = 30
+start_time = time.time()
 
 # Function to get random position
 def get_random_position(window_size, radius):
@@ -36,13 +41,19 @@ def is_target_hit(target_pos, click_pos, radius):
 # Main game loop
 running = True
 while running:
+    current_time = time.time()
+    elapsed_time = current_time - start_time
+    remaining_time = max(0, game_duration - int(elapsed_time))
+
+    if remaining_time == 0:
+        running = False
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
             mouse_pos = pygame.mouse.get_pos()
             if is_target_hit(target_position, mouse_pos, target_radius):
-                print("Target hit")
                 score += 1
                 target_position = get_random_position(window_size, target_radius)
 
@@ -56,11 +67,22 @@ while running:
     score_text = font.render(f"Score: {score}", True, (255, 255, 255))
     screen.blit(score_text, (10, 10))
 
+    # Render remaining time
+    timer_text = font.render(f"Time: {remaining_time}", True, (255, 255, 255))
+    screen.blit(timer_text, (10, 40))
+
     # Update display
     pygame.display.flip()
 
+# Displaying final score
+screen.fill((255, 255, 255))
+final_score_text = font.render(f"Final Score: {score}", True, (0, 0, 0))
+screen.blit(final_score_text, (window_size[0] // 2 - final_score_text.get_width() // 2, window_size[1] //2))
+pygame.display.flip()
+
+# Wait for a few seconds before quitting, 5000 ms = 5 seconds
+pygame.time.wait(5000) 
+
 # Quit 
 pygame.quit()
-sys.exit
-
-    
+sys.exit()
